@@ -1,0 +1,56 @@
+name: devops-incident-response-openenv
+version: "1.0.0"
+description: >
+  A DevOps / SRE incident response simulation environment.
+  An agent diagnoses and resolves production incidents across three
+  difficulty levels: CPU spike, memory leak + DB degradation, and
+  multi-service cascading failure.
+
+entry_point: server/app.py
+
+tasks:
+  - id: easy_cpu_spike
+    difficulty: easy
+    max_steps: 15
+  - id: medium_memory_db
+    difficulty: medium
+    max_steps: 20
+  - id: hard_cascading_failure
+    difficulty: hard
+    max_steps: 30
+
+observation_space:
+  type: text
+  description: >
+    A structured plain-text summary of the current incident state,
+    including active alerts, per-service metrics (CPU, memory, error rate,
+    latency, replica counts), acquired progress flags, and task description.
+
+action_space:
+  type: text
+  description: >
+    A single DevOps shell or kubectl command string.
+    Examples: "kubectl rollout restart deployment/api-gateway -n production",
+    "kill -9 4821", "kubectl rollout undo deployment/config-service".
+
+reward:
+  type: float
+  range: [0.0, 1.0]
+  description: >
+    Shaped reward combining progress on metric improvements, a completion
+    bonus when all success criteria are met, step cost, and penalties for
+    harmful or unrecognised actions.
+
+endpoints:
+  health:   GET  /health
+  reset:    POST /reset
+  step:     POST /step
+  state:    GET  /state
+  tasks:    GET  /tasks
+
+tags:
+  - openenv
+  - devops
+  - sre
+  - incident-response
+  - kubernetes
